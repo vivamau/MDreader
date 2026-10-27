@@ -1,0 +1,352 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+B00000000000000000000014 = {isa = PBXBuildFile; fileRef = F00000000000000000000014; };
+B00000000000000000000013 = {isa = PBXBuildFile; fileRef = F00000000000000000000013; };
+        B00000000000000000000012 = {isa = PBXBuildFile; fileRef = F00000000000000000000012; };
+		B00000000000000000000000 /* MDReaderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000000 /* MDReaderApp.swift */; };
+		B00000000000000000000001 /* MarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000001 /* MarkdownDocument.swift */; };
+		B00000000000000000000002 /* MarkdownBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000002 /* MarkdownBlocks.swift */; };
+		B00000000000000000000003 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000003 /* EditorView.swift */; };
+		B00000000000000000000004 /* PrintHTML.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000004 /* PrintHTML.swift */; };
+		B00000000000000000000005 /* PrintPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000005 /* PrintPreview.swift */; };
+		B00000000000000000000006 /* PeleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000006 /* PeleRenderer.swift */; };
+		B00000000000000000000007 /* MermaidDiagramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000007 /* MermaidDiagramView.swift */; };
+		B00000000000000000000008 /* Resources/pele.global.js in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000008 /* Resources/pele.global.js */; };
+		B00000000000000000000009 /* Resources/Pele-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000009 /* Resources/Pele-LICENSE.txt */; };
+		B00000000000000000000010 /* Resources/SwiftDraw-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000010 /* Resources/SwiftDraw-LICENSE.txt */; };
+		B00000000000000000000011 /* NativePrintRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000011 /* NativePrintRenderer.swift */; };
+		C00000000000000000000003 /* SwiftDraw in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* SwiftDraw */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+F00000000000000000000014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentWorkspace.swift; sourceTree = "<group>"; };
+F00000000000000000000013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentDocuments.swift; sourceTree = "<group>"; };
+        F00000000000000000000012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAppearance.swift; sourceTree = "<group>"; };
+		A00000000000000000000006 /* MDReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = MDReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F00000000000000000000000 /* MDReaderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDReaderApp.swift; sourceTree = "<group>"; };
+		F00000000000000000000001 /* MarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownDocument.swift; sourceTree = "<group>"; };
+		F00000000000000000000002 /* MarkdownBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownBlocks.swift; sourceTree = "<group>"; };
+		F00000000000000000000003 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
+		F00000000000000000000004 /* PrintHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintHTML.swift; sourceTree = "<group>"; };
+		F00000000000000000000005 /* PrintPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintPreview.swift; sourceTree = "<group>"; };
+		F00000000000000000000006 /* PeleRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeleRenderer.swift; sourceTree = "<group>"; };
+		F00000000000000000000007 /* MermaidDiagramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidDiagramView.swift; sourceTree = "<group>"; };
+		F00000000000000000000008 /* Resources/pele.global.js */ = {isa = PBXFileReference; lastKnownFileType = text; path = Resources/pele.global.js; sourceTree = "<group>"; };
+		F00000000000000000000009 /* Resources/Pele-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Resources/Pele-LICENSE.txt"; sourceTree = "<group>"; };
+		F00000000000000000000010 /* Resources/SwiftDraw-LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Resources/SwiftDraw-LICENSE.txt"; sourceTree = "<group>"; };
+		F00000000000000000000011 /* NativePrintRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePrintRenderer.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C00000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C00000000000000000000003 /* SwiftDraw in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A00000000000000000000002 = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000003 /* MDReader */,
+				A00000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A00000000000000000000003 /* MDReader */ = {
+			isa = PBXGroup;
+			children = (
+				F00000000000000000000012 /* WindowAppearance.swift */,
+                F00000000000000000000013 /* RecentDocuments.swift */,
+F00000000000000000000014 /* DocumentWorkspace.swift */,
+F00000000000000000000011 /* NativePrintRenderer.swift */,
+				F00000000000000000000010 /* Resources/SwiftDraw-LICENSE.txt */,
+				F00000000000000000000009 /* Resources/Pele-LICENSE.txt */,
+				F00000000000000000000008 /* Resources/pele.global.js */,
+				F00000000000000000000007 /* MermaidDiagramView.swift */,
+				F00000000000000000000006 /* PeleRenderer.swift */,
+				F00000000000000000000005 /* PrintPreview.swift */,
+				F00000000000000000000004 /* PrintHTML.swift */,
+				F00000000000000000000000 /* MDReaderApp.swift */,
+				F00000000000000000000001 /* MarkdownDocument.swift */,
+				F00000000000000000000002 /* MarkdownBlocks.swift */,
+				F00000000000000000000003 /* EditorView.swift */,
+			);
+			path = MDReader;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000006 /* MDReader.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000005 /* MDReader */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000008 /* Build configuration list for PBXNativeTarget "MDReader" */;
+			buildPhases = (
+				A00000000000000000000009 /* Sources */,
+				C00000000000000000000004 /* Frameworks */,
+				C00000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MDReader;
+			packageProductDependencies = (
+				C00000000000000000000002 /* SwiftDraw */,
+			);
+			productName = MDReader;
+			productReference = A00000000000000000000006 /* MDReader.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A00000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2710;
+			};
+			buildConfigurationList = A00000000000000000000007 /* Build configuration list for PBXProject "MDReader" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A00000000000000000000002;
+			packageReferences = (
+				C00000000000000000000001 /* XCLocalSwiftPackageReference "Vendor/SwiftDraw" */,
+			);
+			productRefGroup = A00000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A00000000000000000000005 /* MDReader */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C00000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000008 /* Resources/pele.global.js in Resources */,
+				B00000000000000000000009 /* Resources/Pele-LICENSE.txt in Resources */,
+				B00000000000000000000010 /* Resources/SwiftDraw-LICENSE.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A00000000000000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000012 /* WindowAppearance.swift in Sources */,
+                B00000000000000000000013 /* RecentDocuments.swift in Sources */,
+B00000000000000000000014 /* DocumentWorkspace.swift in Sources */,
+B00000000000000000000011 /* NativePrintRenderer.swift in Sources */,
+				B00000000000000000000007 /* MermaidDiagramView.swift in Sources */,
+				B00000000000000000000006 /* PeleRenderer.swift in Sources */,
+				B00000000000000000000005 /* PrintPreview.swift in Sources */,
+				B00000000000000000000004 /* PrintHTML.swift in Sources */,
+				B00000000000000000000000 /* MDReaderApp.swift in Sources */,
+				B00000000000000000000001 /* MarkdownDocument.swift in Sources */,
+				B00000000000000000000002 /* MarkdownBlocks.swift in Sources */,
+				B00000000000000000000003 /* EditorView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A00000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A00000000000000000000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = MDReader/MDReader.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MDReader/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.MDReader;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A00000000000000000000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = MDReader/MDReader.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MDReader/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.example.MDReader;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000007 /* Build configuration list for PBXProject "MDReader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000010 /* Debug */,
+				A00000000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000008 /* Build configuration list for PBXNativeTarget "MDReader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000012 /* Debug */,
+				A00000000000000000000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		C00000000000000000000001 /* XCLocalSwiftPackageReference "Vendor/SwiftDraw" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Vendor/SwiftDraw;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C00000000000000000000002 /* SwiftDraw */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00000000000000000000001 /* XCLocalSwiftPackageReference "Vendor/SwiftDraw" */;
+			productName = SwiftDraw;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A00000000000000000000001 /* Project object */;
+}

@@ -1,0 +1,266 @@
+//
+//  Parser.XML.StyleSheet.swift
+//  SwiftDraw
+//
+//  Created by Simon Whitty on 18/8/22.
+//  Copyright 2022 Simon Whitty
+//
+//  Distributed under the permissive zlib license
+//  Get the latest version from here:
+//
+//  https://github.com/swhitty/SwiftDraw
+//
+//  This software is provided 'as-is', without any express or implied
+//  warranty.  In no event will the authors be held liable for any damages
+//  arising from the use of this software.
+//
+//  Permission is granted to anyone to use this software for any purpose,
+//  including commercial applications, and to alter it and redistribute it
+//  freely, subject to the following restrictions:
+//
+//  1. The origin of this software must not be misrepresented; you must not
+//  claim that you wrote the original software. If you use this software
+//  in a product, an acknowledgment in the product documentation would be
+//  appreciated but is not required.
+//
+//  2. Altered source versions must be plainly marked as such, and must not be
+//  misrepresented as being the original software.
+//
+//  3. This notice may not be removed or altered from any source distribution.
+//
+
+
+import Foundation
+
+extension XMLParser {
+
+    func findStyleElements(within element: XML.Element) -> [XML.Element] {
+        return element.children.reduce(into: [XML.Element]()) {
+            if $1.name == "style" {
+                $0.append($1)
+            } else {
+                $0.append(contentsOf: findStyleElements(within: $1))
+            }
+        }
+    }
+
+    func parseStyleSheetElements(within element: XML.Element) -> [DOM.StyleSheet] {
+        var sheets = [DOM.StyleSheet]()
+
+        for e in findStyleElements(within: element) {
+            do {
+                try sheets.append(parseStyleSheetElement(e.innerText))
+            } catch {
+                Self.logParsingError(for: error, filename: filename, parsing: e)
+            }
+        }
+
+        return sheets
+    }
+
+    func parseStyleSheetElement(_ text: String?) throws -> DOM.StyleSheet {
+        let selectorEntries = try Self.parseSelectorEntries(text)
+        let fontEntries = try Self.parseFontFaceEntries(text)
+
+        var sheet = DOM.StyleSheet()
+        sheet.attributes = try selectorEntries.mapValues(parsePresentationAttributes)
+        sheet.fonts = try fontEntries.map(parseFontFace)
+        return sheet
+    }
+
+    static func parseSelectorEntries(_ text: String?) throws -> [DOM.StyleSheet.Selector: [String: String]] {
+        guard let text = text else { return [:] }
+        var scanner = XMLParser.Scanner(text: removeCSSComments(from: text))
+        var entries = [DOM.StyleSheet.Selector: [String: String]]()
+
+        while let (decl, attributes) = try scanner.scanNextBlockDecl() {
+            switch decl {
+            case .selector(let selectors):
+                for selector in selectors {
+                    var copy = entries[selector] ?? [:]
+                    for (key, value) in attributes {
+                        copy[key] = value
+                    }
+                    entries[selector] = copy
+                }
+            case .atRule:
+                ()
+            }
+        }
+
+        return entries
+    }
+
+    static func parseFontFaceEntries(_ text: String?) throws -> [[String: String]] {
+        guard let text = text else { return [] }
+        var scanner = XMLParser.Scanner(text: removeCSSComments(from: text))
+        var entries = [[String: String]]()
+
+        while let (decl, attributes) = try scanner.scanNextBlockDecl() {
+            switch decl {
+            case .atRule("font-face"):
+                entries.append(attributes)
+            default:
+                ()
+            }
+        }
+
+        return entries
+    }
+
+    static func removeCSSComments(from text: String) -> String {
+        let regex = try! NSRegularExpression(pattern: "\\/\\*.*\\*\\/", options: .caseInsensitive)
+        let range = NSMakeRange(0, (text as NSString).length)
+        return regex.stringByReplacingMatches(in: text, options: [], range: range, withTemplate: "")
+    }
+}
+
+extension XMLParser.Scanner {
+
+    enum BlockDeclaration {
+        case selector([DOM.StyleSheet.Selector])
+        case atRule(String)
+    }
+
+    mutating func scanNextBlockDecl() throws -> (BlockDeclaration, [String: String])? {
+        if let attributes = try scanNextFontFace() {
+            return (.atRule("font-face"), attributes)
+        }
+        if let name = scanUnknownAtRule() {
+            return (.atRule(name), [:])
+        }
+        let selectorTypes = try scanSelectorTypes()
+        guard !selectorTypes.isEmpty else { return nil }
+        return (.selector(selectorTypes), try scanAtttributes())
+    }
+
+    private mutating func scanNextClass() throws -> String? {
+        guard doScanString(".") else { return nil }
+        return try scanSelectorName()
+    }
+
+    private mutating func scanNextID() throws -> String? {
+        guard doScanString("#") else { return nil }
+        return try scanSelectorName()
+    }
+
+    mutating func scanNextFontFace() throws -> [String: String]? {
+        guard doScanString("@font-face") else {
+            return nil
+        }
+        return try scanAtttributes()
+    }
+
+    /// Skips unknown @ rules (e.g. @media, @supports) including nested blocks.
+    /// Returns the rule name if an unknown @ rule was consumed, nil otherwise.
+    mutating func scanUnknownAtRule() -> String? {
+        guard doScanString("@") else { return nil }
+        guard let name = try? scanString(upTo: .init(charactersIn: "{")),
+              doScanString("{") else { return nil }
+        var depth = 1
+        while depth > 0 && !isEOF {
+            if doScanString("{") {
+                depth += 1
+            } else if doScanString("}") {
+                depth -= 1
+            } else {
+                _ = try? scanString(upTo: .init(charactersIn: "{}"))
+            }
+        }
+        return name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private mutating func scanNextElement() throws -> String? {
+        do {
+            return try scanSelectorName()
+        } catch {
+            guard isEOF else {
+                throw error
+            }
+            return nil
+        }
+    }
+
+    private mutating func scanSelectorName() throws -> String? {
+        guard !nextScanString("{") else { return nil }
+        let name = try scanString(upTo: .init(charactersIn: "{,")).trimmingCharacters(in: .whitespacesAndNewlines)
+        scanStringIfPossible(",")
+        return name
+    }
+
+     mutating func scanSelectorTypes() throws -> [DOM.StyleSheet.Selector] {
+        var selectors: [DOM.StyleSheet.Selector] = []
+        while let next = try scanNextSelectorType() {
+            selectors.append(next)
+        }
+        return selectors
+    }
+
+    private mutating func scanNextSelectorType() throws -> DOM.StyleSheet.Selector? {
+        if let name = try scanNextClass() {
+            return .class(name)
+        } else if let name = try scanNextID() {
+            return .id(name)
+        } else if let name = try scanNextElement() {
+            return .element(name)
+        } else {
+            return nil
+        }
+    }
+
+    mutating func scanAtttributes() throws -> [String: String] {
+        _ = doScanString("{")
+        var attributes = [String: String]()
+        var last: String?
+        repeat {
+            last = try scanNextAttributeKey()
+            if let last = last {
+                let val = try scanNextAttributeValue()
+                attributes[last] = val
+            }
+        } while last != nil
+        return attributes
+    }
+
+    mutating func scanNextAttribute() throws -> (key: String, value: String)? {
+        if let key = try scanNextAttributeKey() {
+            return (key: key, value: try scanNextAttributeValue())
+        }
+        return nil
+    }
+
+    mutating func scanNextAttributeKey() throws -> String? {
+        guard !doScanString("}") else { return nil }
+        let key = try scanString(upTo: ":")
+        _ = try scanString(":")
+        return key.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    mutating func scanNextAttributeValue() throws -> String {
+        let value = try scanString(upTo: .init(charactersIn: ";\n}"), preservingStrings: true)
+        _ = doScanString(";")
+        return value.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+extension String {
+    var unquoted: String {
+        if (hasPrefix("'") && hasSuffix("'")) ||
+           (hasPrefix("\"") && hasSuffix("\"")) {
+            return String(dropFirst().dropLast())
+        }
+        return self
+    }
+}
+//Allow Dictionary to become an attribute parser
+extension Dictionary: AttributeParser where Key == String, Value == String {
+    package var parser: any AttributeValueParser { return XMLParser.ValueParser() }
+    package var options: XMLParser.Options { return [] }
+
+    package func parse<T>(_ key: String, _ exp: (String) throws -> T) throws -> T {
+        guard let value = self[key] else {
+            throw XMLParser.Error.missingAttribute(name: key)
+        }
+        return try exp(value)
+    }
+}
