@@ -18,7 +18,8 @@ ditto "${MDREADER_RELEASE_DERIVED_DATA:-/tmp/MDReader-release-build}/Build/Produ
 # Preserve the app sandbox entitlements in the ad-hoc signature.
 codesign --force --sign - --options runtime --entitlements "$ROOT/MDReader/MDReader.entitlements" "$APP"
 codesign --verify --deep --strict "$APP"
-lipo "$APP/Contents/MacOS/MDReader" -verify_arch arm64 x86_64
+lipo "$APP/Contents/MacOS/MDReader" -verify_arch arm64
+lipo "$APP/Contents/MacOS/MDReader" -verify_arch x86_64
 ln -s /Applications "$WORK/staging/Applications"
 cat > "$WORK/staging/Read Me.txt" <<TEXT
 MDReader $VERSION (build $BUILD_NUMBER)
