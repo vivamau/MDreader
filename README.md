@@ -105,3 +105,15 @@ The editor mode, sidebar visibility, and expanded individual projects use per-sc
 ## Save confirmation on Mac
 
 Closing a changed document tab uses the native save confirmation. Quitting reviews each document before termination and stops if the user cancels or saving fails. Save keeps the changes; Don’t Save discards them through AppKit, including reverting automatic saves. Unchanged documents close without a prompt. This confirmation preference is set only for MDReader; it does not change other apps’ settings. Discarded untitled drafts are closed so they are not restored on the next launch.
+
+## macOS releases
+
+Version **0.1.0**, build **1**, is the initial preview release. Download packaged builds from [GitHub Releases](https://github.com/vivamau/MDreader/releases). These preview artifacts are ad-hoc signed and are not notarized.
+
+To build a universal Apple Silicon/Intel DMG with Xcode installed:
+
+```sh
+./scripts/package-macos.sh 0.1.0 1
+```
+
+The script verifies both architectures, the app signature, and the disk image, then writes the DMG and SHA-256 checksum under `dist/`. Generated artifacts are excluded from Git. Release binaries are attached to a GitHub release instead of being committed to source history. After pushing the matching version tag, `python3 scripts/publish-github.py 0.1.0` uploads both files and publishes a prerelease; it uses the configured Git credential helper and never prints credentials. Update `RELEASE_NOTES.md` and the Xcode version/build settings before a new version.
