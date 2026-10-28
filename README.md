@@ -1,6 +1,6 @@
 # MDReader
 
-A native SwiftUI Markdown document editor for macOS 14+, iPhone, and iPad (iOS/iPadOS 17+). Pele and SwiftDraw are vendored for offline rendering; no network services are used. fsdf sdfs.   sdf sdf seter wqererewrw
+A native SwiftUI Markdown document editor for macOS 14+, iPhone, and iPad (iOS/iPadOS 17+). Pele and SwiftDraw are vendored for offline rendering; no network services are used.
 
 ## Run
 
