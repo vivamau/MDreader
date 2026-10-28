@@ -108,12 +108,12 @@ Closing a changed document tab uses the native save confirmation. Quitting revie
 
 ## macOS releases
 
-Version **0.1.0**, build **1**, is the initial preview release. Download packaged builds from [GitHub Releases](https://github.com/vivamau/MDreader/releases). These preview artifacts are ad-hoc signed and are not notarized.
+Version **0.1.1**, build **2**, adds the new italic m and fountain-pen nib icon. Download packaged builds from [GitHub Releases](https://github.com/vivamau/MDreader/releases). These preview artifacts are ad-hoc signed and are not notarized.
 
 To build a universal Apple Silicon/Intel DMG with Xcode installed:
 
 ```sh
-./scripts/package-macos.sh 0.1.0 1
+./scripts/package-macos.sh 0.1.1 2
 ```
 
-The script verifies both architectures, the app signature, and the disk image, then writes the DMG and SHA-256 checksum under `dist/`. Generated artifacts are excluded from Git. Release binaries are attached to a GitHub release instead of being committed to source history. After pushing the matching version tag, `python3 scripts/publish-github.py 0.1.0` uploads both files and publishes a prerelease; it uses the configured Git credential helper and never prints credentials. Update `RELEASE_NOTES.md` and the Xcode version/build settings before a new version.
+The script verifies both architectures, the app signature, and the disk image, then writes the DMG and SHA-256 checksum under `dist/`. Generated artifacts are excluded from Git. Release binaries are attached to a GitHub release instead of being committed to source history. After pushing the matching version tag, `python3 scripts/publish-github.py 0.1.1` uploads both files and publishes a prerelease; it uses the configured Git credential helper and never prints credentials. Update `RELEASE_NOTES.md` and the Xcode version/build settings before a new version.

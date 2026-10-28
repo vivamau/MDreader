@@ -15,6 +15,8 @@ xcodebuild -project "$ROOT/MDReader.xcodeproj" -scheme MDReader -configuration R
   MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" build
 APP="$WORK/staging/MDReader.app"
 ditto "${MDREADER_RELEASE_DERIVED_DATA:-/tmp/MDReader-release-build}/Build/Products/Release/MDReader.app" "$APP"
+# Fail packaging if the app icon was accidentally omitted from the resource phase.
+[[ -f "$APP/Contents/Resources/AppIcon.icns" ]] || { echo 'Missing compiled app icon' >&2; exit 1; }
 # Preserve the app sandbox entitlements in the ad-hoc signature.
 codesign --force --sign - --options runtime --entitlements "$ROOT/MDReader/MDReader.entitlements" "$APP"
 codesign --verify --deep --strict "$APP"
