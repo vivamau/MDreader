@@ -114,7 +114,7 @@ struct DocumentWorkspace: View {
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } detail: {
-            EditorView(document: $document, documentTitle: fileURL?.lastPathComponent ?? "Untitled")
+            EditorView(document: $document, documentTitle: fileURL?.lastPathComponent ?? "untitled.md")
         }
         #if os(macOS)
         .background(DocumentWindowReader(reference: documentWindow).frame(width: 0, height: 0))
@@ -136,7 +136,7 @@ struct DocumentWorkspace: View {
             }
         }
         .fileExporter(isPresented: $showingNewFile, document: newDocument,
-                      contentType: .markdownDocument, defaultFilename: "Untitled.md") { result in
+                      contentType: .markdownDocument, defaultFilename: "untitled.md") { result in
             defer { newFileProject = nil }
             switch result {
             case let .success(url):

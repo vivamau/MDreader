@@ -8,11 +8,36 @@ import AppKit
 @MainActor
 final class DocumentLaunchDelegate: NSObject, NSApplicationDelegate {
     private var reviewingTermination = false
+    private var startup = DocumentStartupState()
+    private var restorationObserver: NSObjectProtocol?
     override init() {
         super.init()
         // This is an app-local preference, not a change to the global macOS setting.
         UserDefaults.standard.set(true, forKey: "NSQuitAlwaysKeepsWindows")
         UserDefaults.standard.set(true, forKey: "NSCloseAlwaysConfirmsChanges")
+        restorationObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didFinishRestoringWindowsNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.startup.restorationFinished = true
+                self?.finishStartupIfReady()
+            }
+        }
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        startup.launchFinished = true
+        finishStartupIfReady()
+    }
+
+    private func finishStartupIfReady() {
+        // Yield to native restoration/open handlers before checking for documents.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            let controller = NSDocumentController.shared
+            guard self.startup.shouldCreateBlank(hasDocuments: !controller.documents.isEmpty) else { return }
+            _ = self.applicationOpenUntitledFile(NSApp)
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -32,19 +57,38 @@ final class DocumentLaunchDelegate: NSObject, NSApplicationDelegate {
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }
 
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
-        NSDocumentController.shared.documents.isEmpty
+        // SwiftUI's default DocumentGroup launch opens a picker. Startup is handled
+        // explicitly after restoration instead.
+        false
     }
 
     func applicationOpenUntitledFile(_ sender: NSApplication) -> Bool {
         let controller = NSDocumentController.shared
         guard controller.documents.isEmpty else { return true }
         do {
-            try controller.openUntitledDocumentAndDisplay(true)
+            let document = try controller.openUntitledDocumentAndDisplay(true)
+            document.displayName = "untitled.md"
+            for windowController in document.windowControllers {
+                windowController.synchronizeWindowTitleWithDocumentName()
+            }
             return true
         } catch {
             sender.presentError(error)
             return false
         }
+    }
+}
+
+/// Both events may arrive in either order. Resolve startup only once.
+struct DocumentStartupState {
+    var launchFinished = false
+    var restorationFinished = false
+    private(set) var resolved = false
+
+    mutating func shouldCreateBlank(hasDocuments: Bool) -> Bool {
+        guard launchFinished, restorationFinished, !resolved else { return false }
+        resolved = true
+        return !hasDocuments
     }
 }
 

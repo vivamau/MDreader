@@ -72,7 +72,7 @@ MDREADER_TEST_ARTIFACTS=/tmp/MDReader-pele-artifacts swift test
 
 ## Reading settings
 
-Click the gear in the header, just before the theme switcher to choose separate editor and preview fonts (System, Serif, Rounded, Monospaced, or Georgia), font size, appearance, and separate background and font colors for light and dark mode. Changes apply immediately and persist across launches and document windows. Selected font colors apply to the editor and Markdown text, including headings, tables, quotes, and code blocks; diagrams keep their own light/dark palette. Code blocks stay monospaced, and print output retains its paper-friendly layout. Reset to Defaults restores the original choices.
+Click the gear in the header to choose separate editor and preview fonts (System, Serif, Rounded, Monospaced, or Georgia), font size, appearance, and separate background and font colors for light and dark mode. Changes apply immediately and persist across launches and document windows. Selected font colors apply to the editor and Markdown text, including headings, tables, quotes, and code blocks; diagrams keep their own light/dark palette. Code blocks stay monospaced, and print output retains its paper-friendly layout. Reset to Defaults restores the original choices.
 
 ## Recent files
 
@@ -98,7 +98,7 @@ On Mac, opening a file from the Library, a project, or the new-file picker selec
 
 ## Startup and restoration
 
-On Mac, MDReader opts into native secure document/window restoration and keeps windows on normal quit using an app-local preference. Relaunch restores the previous document session through AppKit, including its native autosaved-document recovery. If AppKit requests an initial document because there is no restorable session, MDReader creates an empty Markdown document instead of showing an Open dialog. Explicitly closing a document removes it from the native session; recent history is not treated as an open session.
+On Mac, MDReader opts into native secure document/window restoration and keeps windows on normal quit using an app-local preference. Relaunch restores the previous document session through AppKit, including its native autosaved-document recovery. After launch and window restoration finish, if no document is open, MDReader creates an empty `untitled.md` in Split view instead of showing an Open dialog. Restored windows retain their saved editor mode. Explicitly closing a document removes it from the native session; recent history is not treated as an open session.
 
 The editor mode, sidebar visibility, and expanded individual projects use per-scene storage. Appearance, fonts, and the Projects/Recent Files section expansion settings continue to use their existing persisted preferences. Restoration should be checked by quitting normally with Command-Q and relaunching; it is not a backup mechanism for force quits or unavailable files.
 

@@ -73,7 +73,7 @@ struct EditorView: View {
     #endif
     @State private var showingSettings = false
     @State private var showingPrint = false
-    @SceneStorage("editorMode") private var mode: EditorMode = .edit
+    @SceneStorage("editorMode") private var mode: EditorMode = .split
     @AppStorage("editorFontSize") private var fontSize = 15.0
     @AppStorage("appTheme") private var theme: AppTheme = .system
     @AppStorage("editorFontFamily") private var editorFont: ReaderFont = .monospaced
@@ -177,19 +177,6 @@ struct EditorView: View {
                         .help("Settings")
                         .popover(isPresented: $showingSettings) { settings }
 
-                    Menu {
-                        Picker("Appearance", selection: $theme) {
-                            ForEach(AppTheme.allCases) { option in
-                                Label(option.title, systemImage: option.symbol).tag(option)
-                            }
-                        }
-                        .pickerStyle(.inline)
-                    } label: {
-                        Label("Appearance", systemImage: theme.symbol)
-                    }
-                    .labelStyle(.iconOnly)
-                    .help("Appearance: \(theme.title)")
-                    .accessibilityValue(theme.title)
                 }
             }
         }
