@@ -167,6 +167,16 @@ final class DocumentProjects: ObservableObject {
         updated[index].files.removeAll { $0.id == file.id }
         try commit(updated)
     }
+    func removeFileEverywhere(_ file: RecentDocument, resolvedURL: URL) throws {
+        var updated = items
+        for index in updated.indices {
+            updated[index].files.removeAll {
+                $0.id == file.id || $0.url.standardizedFileURL == resolvedURL.standardizedFileURL
+            }
+        }
+        if updated != items { try commit(updated) }
+    }
+
     func refresh(_ old: RecentDocument, with file: RecentDocument) throws {
         var updated = items
         for index in updated.indices where updated[index].files.contains(where: { $0.id == old.id }) {

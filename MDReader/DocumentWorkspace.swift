@@ -29,6 +29,8 @@ struct DocumentWorkspace: View {
     @State private var compactColumn: NavigationSplitViewColumn = .detail
     @State private var showingImporter = false
     @State private var opening = false
+    @State private var deleting = false
+    @State private var pendingDeletion: RecentDocument?
     @State private var openError: String?
 
     @State private var projectName = ""
@@ -172,6 +174,19 @@ struct DocumentWorkspace: View {
                 }
             }.padding(24).frame(minWidth: 280)
         }
+        .alert("Delete file?", isPresented: Binding(
+            get: { pendingDeletion != nil },
+            set: { if !$0 { pendingDeletion = nil } }
+        ), presenting: pendingDeletion) { item in
+            Button("Delete", role: .destructive) { deleteFile(item) }
+            Button("Cancel", role: .cancel) {}
+        } message: { item in
+            #if os(macOS)
+            Text("“\(item.name)” will be moved to Trash and removed from all projects and Recent Files.")
+            #else
+            Text("“\(item.name)” will be deleted from storage and removed from all projects and Recent Files. This cannot be undone.")
+            #endif
+        }
         .alert("Unable to Complete Action", isPresented: Binding(get: { openError != nil }, set: { if !$0 { openError = nil } })) {
             Button("Open File…") { importerProject = nil; showingImporter = true }
             Button("OK", role: .cancel) {}
@@ -196,17 +211,59 @@ struct DocumentWorkspace: View {
     }
 
     private func fileRow(_ item: RecentDocument) -> some View {
-        Button { open(item) } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "doc.text").foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(item.name).lineLimit(1).foregroundStyle(.primary)
-                    Text(item.folder).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+        HStack(spacing: 8) {
+            Button { open(item) } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.text").foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(item.name).lineLimit(1).foregroundStyle(.primary)
+                        Text(item.folder).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                    if item.url == fileURL?.standardizedFileURL { Image(systemName: "checkmark").foregroundStyle(.tint) }
+                }.padding(.vertical, 4).contentShape(Rectangle())
+            }.buttonStyle(.plain).help(item.url.path)
+            LibraryTrashButton(name: item.name) { pendingDeletion = item }
+        }.disabled(opening || deleting)
+    }
+
+    private func deleteFile(_ item: RecentDocument) {
+        guard !deleting else { return }
+        deleting = true
+        Task { @MainActor in
+            defer { deleting = false }
+            do {
+                let url = try recents.resolve(item)
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                #if os(macOS)
+                if let openDocument = NSDocumentController.shared.document(for: url) {
+                    // Honor Save/Discard/Cancel before removing an open document.
+                    guard await DocumentCloseReview().confirm([openDocument]) else { return }
+                    openDocument.close()
                 }
-                Spacer(minLength: 0)
-                if item.url == fileURL?.standardizedFileURL { Image(systemName: "checkmark").foregroundStyle(.tint) }
-            }.padding(.vertical, 4).contentShape(Rectangle())
-        }.buttonStyle(.plain).disabled(opening).help(item.url.path)
+                try FileManager.default.trashItem(at: url, resultingItemURL: nil)
+                #else
+                guard url.standardizedFileURL != fileURL?.standardizedFileURL else {
+                    throw NSError(domain: "MDReader", code: 4, userInfo: [NSLocalizedDescriptionKey:
+                        "Close this document before deleting it from the Library."])
+                }
+                var coordinationError: NSError?
+                var deletionError: Error?
+                NSFileCoordinator().coordinate(writingItemAt: url, options: .forDeleting, error: &coordinationError) { coordinatedURL in
+                    do { try FileManager.default.removeItem(at: coordinatedURL) }
+                    catch { deletionError = error }
+                }
+                if let error = coordinationError ?? deletionError as NSError? { throw error }
+                #endif
+                recents.remove(item)
+                for entry in recents.items where entry.url.standardizedFileURL == url.standardizedFileURL {
+                    recents.remove(entry)
+                }
+                do { try projects.removeFileEverywhere(item, resolvedURL: url) }
+                catch { openError = "The file was deleted, but its project references could not be updated: \(error.localizedDescription)" }
+            } catch { openError = error.localizedDescription }
+        }
     }
 
     @ViewBuilder private func projectActions(_ project: DocumentProject) -> some View {
@@ -331,3 +388,22 @@ private func openInDocumentBrowser(_ url: URL) async throws {
     documentBrowser.delegate?.documentBrowser?(documentBrowser, didPickDocumentsAt: [revealed])
 }
 #endif
+
+private struct LibraryTrashButton: View {
+    let name: String
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "trash")
+                .foregroundStyle(hovering ? Color.red : Color.secondary)
+                .frame(width: 28, height: 28)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .help("Delete \(name)")
+        .accessibilityLabel("Delete \(name)")
+    }
+}

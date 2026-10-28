@@ -96,4 +96,22 @@ final class DocumentProjectsTests: XCTestCase {
         try store.refresh(old, with: new)
         XCTAssertEqual(store.items.map(\.files), [[new], [new]])
     }
+    @MainActor func testDeletedFileReferencesRemovedFromEveryProjectAndPersisted() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let archive = folder.appendingPathComponent("projects.json")
+        let store = DocumentProjects(storageURL: archive)
+        let a = try store.create(name: "A")
+        let b = try store.create(name: "B")
+        let old = RecentDocument(url: folder.appendingPathComponent("old.md"), bookmark: nil, openedAt: Date())
+        let resolved = RecentDocument(url: folder.appendingPathComponent("moved.md"), bookmark: nil, openedAt: Date())
+        let keep = RecentDocument(url: folder.appendingPathComponent("keep.md"), bookmark: nil, openedAt: Date())
+        try store.add(old, to: a)
+        try store.add(resolved, to: b)
+        try store.add(keep, to: b)
+        try store.removeFileEverywhere(old, resolvedURL: resolved.url)
+        XCTAssertEqual(store.items.map(\.files), [[], [keep]])
+        XCTAssertEqual(DocumentProjects(storageURL: archive).items, store.items)
+    }
+
 }
