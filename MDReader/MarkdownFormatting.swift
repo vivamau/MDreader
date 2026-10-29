@@ -16,6 +16,71 @@ enum MarkdownFormatCommand {
     case bulletedList
     case numberedList
     case codeBlock
+    case mermaid(MermaidSnippet)
+}
+
+enum MermaidSnippet: String, CaseIterable, Identifiable {
+    case flowchart
+    case sequence
+    case state
+    case pie
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .flowchart: "Flowchart"
+        case .sequence: "Sequence Diagram"
+        case .state: "State Diagram"
+        case .pie: "Pie Chart"
+        }
+    }
+
+    var template: String {
+        switch self {
+        case .flowchart:
+            """
+            ```mermaid
+            flowchart LR
+                A[Start] --> B[Next step]
+            ```
+            """
+        case .sequence:
+            """
+            ```mermaid
+            sequenceDiagram
+                participant A as Alice
+                participant B as Bob
+                A->>B: Message
+            ```
+            """
+        case .state:
+            """
+            ```mermaid
+            stateDiagram-v2
+                [*] --> Active
+                Active --> [*]
+            ```
+            """
+        case .pie:
+            """
+            ```mermaid
+            pie title Distribution
+                "Item A" : 60
+                "Item B" : 40
+            ```
+            """
+        }
+    }
+
+    var focusText: String {
+        switch self {
+        case .flowchart: "Start"
+        case .sequence: "Alice"
+        case .state: "Active"
+        case .pie: "Distribution"
+        }
+    }
 }
 
 private struct MarkdownEdit {
@@ -75,6 +140,23 @@ private enum MarkdownFormatter {
             )
         }
 
+        func block(_ template: String, focusText: String) -> MarkdownEdit {
+            let needsLeadingNewline = selection.location > 0
+                && source.substring(with: NSRange(location: selection.location - 1, length: 1)) != "\n"
+            let selectionEnd = selection.location + selection.length
+            let needsTrailingNewline = selectionEnd < source.length
+                && source.substring(with: NSRange(location: selectionEnd, length: 1)) != "\n"
+            let leading = needsLeadingNewline ? "\n\n" : ""
+            let trailing = needsTrailingNewline ? "\n\n" : ""
+            let replacement = leading + template + trailing
+            let focus = (replacement as NSString).range(of: focusText)
+            return MarkdownEdit(
+                range: selection,
+                replacement: replacement,
+                selection: NSRange(location: selection.location + focus.location, length: focus.length)
+            )
+        }
+
         switch command {
         case let .heading(level):
             return lines { values in
@@ -101,6 +183,8 @@ private enum MarkdownFormatter {
             }
         case .codeBlock:
             return wrapped(prefix: "```\n", suffix: "\n```", placeholder: "code")
+        case let .mermaid(snippet):
+            return block(snippet.template, focusText: snippet.focusText)
         }
     }
 
@@ -152,6 +236,19 @@ struct MarkdownFormattingBar: View {
                 formatButton("Bulleted List", symbol: "list.bullet", command: .bulletedList)
                 formatButton("Numbered List", symbol: "list.number", command: .numberedList)
                 formatButton("Code Block", symbol: "curlybraces", command: .codeBlock)
+
+                Divider().frame(height: 18)
+
+                Menu {
+                    ForEach(MermaidSnippet.allCases) { snippet in
+                        Button(snippet.title) { apply(.mermaid(snippet)) }
+                    }
+                } label: {
+                    Label("Mermaid Snippet", systemImage: "point.3.connected.trianglepath.dotted")
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 4)
+                }
+                .help("Insert a Mermaid diagram snippet")
             }
             .labelStyle(.iconOnly)
             .font(.system(size: 20, weight: .medium))
