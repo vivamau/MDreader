@@ -1,17 +1,18 @@
-# MDReader 0.2.1
+# MDReader 0.3.0
 
-Preview release for macOS 14 and later, supporting Apple Silicon and Intel. Build 4.
+Preview release for macOS 14 and later, supporting Apple Silicon and Intel. Build 5.
 
-- Adds a trash icon beside filenames in Projects and Recent Files, turning red on hover.
-- Requires confirmation before deleting a file and removes its references from all projects and Recent Files.
-- On Mac, moves files to Trash and honors Save/Discard/Cancel for open documents.
-- On iOS, deletion is permanent; the currently displayed document must be closed first.
+- Makes the Markdown editor slightly darker than the preview while preserving the background selected in Settings.
+- Keeps the tab and toolbar header on a native translucent material instead of extending the document color behind it.
+- Renders Mermaid diagrams in both the in-app print preview and the macOS system print dialog using high-resolution attachments.
+- Refreshes the native print preview when Markdown changes.
+- Enlarges the Settings popover just enough to display its controls without routine scrolling.
 
-Validation: universal macOS build, DMG integrity and SHA-256 checks, and all 23 regression tests passed. macOS and iOS Simulator debug builds also passed.
+Validation includes the complete regression suite, macOS and iOS Simulator builds, a universal macOS release build, DMG integrity checks, and published asset checksum verification.
 
 ## Installation
 
-Download `MDReader-0.2.1-macOS-universal.dmg`, mount it, and drag MDReader to Applications.
+Download `MDReader-0.3.0-macOS-universal.dmg`, mount it, and drag MDReader to Applications.
 
 This preview is ad-hoc signed, **not Developer ID signed or notarized**. macOS Gatekeeper may block its first launch. The matching `.sha256` file provides the download checksum.
 

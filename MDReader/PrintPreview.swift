@@ -67,6 +67,10 @@ struct PrintPreview: View {
 #if os(macOS)
 private struct NativePrintPreview: NSViewRepresentable {
     let source: String
+    final class Coordinator {
+        var source = ""
+    }
+    func makeCoordinator() -> Coordinator { Coordinator() }
     func makeNSView(context: Context) -> NSScrollView {
         let scroll = NSScrollView()
         scroll.hasVerticalScroller = true
@@ -74,9 +78,14 @@ private struct NativePrintPreview: NSViewRepresentable {
         scroll.drawsBackground = true
         scroll.backgroundColor = .white
         scroll.documentView = NativePrintRenderer.textView(source: source, width: 540)
+        context.coordinator.source = source
         return scroll
     }
-    func updateNSView(_ nsView: NSScrollView, context: Context) {}
+    func updateNSView(_ nsView: NSScrollView, context: Context) {
+        guard context.coordinator.source != source else { return }
+        nsView.documentView = NativePrintRenderer.textView(source: source, width: 540)
+        context.coordinator.source = source
+    }
 }
 #else
 /// UIKit's markup formatter paginates local HTML directly; no WKWebView load is needed.

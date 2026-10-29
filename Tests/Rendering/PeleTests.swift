@@ -61,10 +61,25 @@ extension PeleTests {
         XCTAssertGreaterThan(view.frame.height, 0)
         let storage = try XCTUnwrap(view.textStorage)
         var attachments = 0
+        var diagramImage: NSImage?
         storage.enumerateAttribute(.attachment, in: NSRange(location: 0, length: storage.length)) { value, _, _ in
-            if value is NSTextAttachment { attachments += 1 }
+            if let attachment = value as? NSTextAttachment,
+               let image = (attachment.attachmentCell as? NSTextAttachmentCell)?.image,
+               image.isValid, image.tiffRepresentation?.isEmpty == false {
+                attachments += 1
+                diagramImage = image
+            }
         }
         XCTAssertEqual(attachments, 1)
+        let bitmap = try XCTUnwrap(NSBitmapImageRep(data: try XCTUnwrap(diagramImage?.tiffRepresentation)))
+        let containsInk = stride(from: 0, to: bitmap.pixelsHigh, by: 4).contains { y in
+            stride(from: 0, to: bitmap.pixelsWide, by: 4).contains { x in
+                guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB) else { return false }
+                return color.alphaComponent > 0.1
+                    && min(color.redComponent, color.greenComponent, color.blueComponent) < 0.9
+            }
+        }
+        XCTAssertTrue(containsInk, "The print attachment should contain rendered diagram pixels.")
     }
 
     @MainActor func testVisualFixtures() throws {

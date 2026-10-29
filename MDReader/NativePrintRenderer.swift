@@ -47,9 +47,11 @@ enum NativePrintRenderer {
                     let svg = try pele!.render(text, width: 540)
                     let scale = min(1, 520 / svg.size.width, 650 / svg.size.height)
                     let size = CGSize(width: svg.size.width * scale, height: svg.size.height * scale)
-                    guard let data = try? svg.pdfData(), let image = NSImage(data: data) else {
-                        throw PeleRenderError.invalid("Could not prepare diagram for printing.")
-                    }
+                    // NSTextAttachment can lay out a PDF-backed NSImage while failing to
+                    // draw that representation in an NSTextView/print operation. Render a
+                    // 2x bitmap so the same image is visible in preview and on paper.
+                    let image = svg.rasterize(with: size, scale: 2)
+                    guard image.isValid else { throw PeleRenderError.invalid("Could not prepare diagram for printing.") }
                     image.size = size
                     let attachment = NSTextAttachment()
                     attachment.attachmentCell = NSTextAttachmentCell(imageCell: image)

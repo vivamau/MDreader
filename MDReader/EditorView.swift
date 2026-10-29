@@ -93,6 +93,14 @@ struct EditorView: View {
     private var backgroundRGB: Int {
         resolvedTheme == .dark ? darkBackground : lightBackground
     }
+    private var editorBackgroundRGB: Int {
+        // Keep the chosen color and hue, but separate the source editor from the
+        // rendered page by blending a small amount of black into each channel.
+        func darken(_ channel: Int) -> Int { Int((Double(channel) * 0.94).rounded()) }
+        return (darken((backgroundRGB >> 16) & 255) << 16)
+            | (darken((backgroundRGB >> 8) & 255) << 8)
+            | darken(backgroundRGB & 255)
+    }
     private var documentTextColor: Color {
         Color(rgb: resolvedTheme == .dark ? darkFontColor : lightFontColor)
     }
@@ -180,6 +188,12 @@ struct EditorView: View {
                 }
             }
         }
+        #if os(macOS)
+        // Mask the document canvas at the toolbar/tab boundary. The native
+        // material stays translucent without inheriting the selected page color.
+        .toolbarBackground(.ultraThinMaterial, for: .windowToolbar)
+        .toolbarBackground(.visible, for: .windowToolbar)
+        #endif
         .environment(\.colorScheme, resolvedTheme)
         #if os(macOS)
         .frame(minWidth: 500, minHeight: 350)
@@ -233,9 +247,9 @@ struct EditorView: View {
         }
         .font(.body)
         .foregroundStyle(.primary)
-        .frame(idealWidth: 360, idealHeight: 500)
+        .frame(idealWidth: 360, idealHeight: 560)
         #if os(macOS)
-        .frame(width: 360, height: 500)
+        .frame(width: 360, height: 560)
         #endif
     }
 
@@ -245,7 +259,7 @@ struct EditorView: View {
             .foregroundStyle(documentTextColor)
             .scrollContentBackground(.hidden)
             .padding(12)
-            .background(Color(rgb: backgroundRGB))
+            .background(Color(rgb: editorBackgroundRGB))
             .environment(\.colorScheme, canvasScheme)
             .accessibilityLabel("Markdown source")
             #if os(iOS)
