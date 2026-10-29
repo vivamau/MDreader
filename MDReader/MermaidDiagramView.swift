@@ -43,7 +43,9 @@ struct MermaidDiagramView: View {
             }
         }
         .task(id: request) {
-            svg = nil; error = nil
+            // Keep the current diagram visible while a resized version is prepared.
+            // Clearing it here makes divider drags flash a progress indicator.
+            error = nil
             do {
                 try await Task.sleep(for: .milliseconds(100))
                 let rendered = try await PeleRenderService.shared.render(request)
@@ -51,6 +53,7 @@ struct MermaidDiagramView: View {
                 svg = rendered
             } catch {
                 guard !Task.isCancelled else { return }
+                svg = nil
                 self.error = error.localizedDescription
             }
         }

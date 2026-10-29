@@ -83,6 +83,8 @@ final class DocumentWindowTests: XCTestCase {
         XCTAssertTrue(source.tabbedWindows?.contains(where: { $0 === destination }) == true)
         XCTAssertTrue(source.isDocumentEdited)
         XCTAssertEqual(destination.tabbingMode, .preferred)
+        XCTAssertTrue(source.isMovableByWindowBackground)
+        XCTAssertTrue(destination.isMovableByWindowBackground)
         XCTAssertEqual(source.tabbingIdentifier, destination.tabbingIdentifier)
         DocumentWindowReference.activate(destination, in: source)
         XCTAssertEqual(source.tabbedWindows?.count, 2)

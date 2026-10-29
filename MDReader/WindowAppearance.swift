@@ -192,6 +192,7 @@ final class DocumentWindowReference: NSObject, ObservableObject {
     static func configure(_ window: NSWindow) {
         NSWindow.allowsAutomaticWindowTabbing = true
         window.isRestorable = true
+        window.isMovableByWindowBackground = true
         window.tabbingIdentifier = "MDReader.Documents"
         window.tabbingMode = .preferred
     }

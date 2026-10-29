@@ -48,6 +48,8 @@ final class PeleTests: XCTestCase {
         let source = "```mermaid\nflowchart LR\n A --> B\n```"
         XCTAssertTrue(PrintHTML.document(source, title: "Test").contains("Mermaid diagram source"))
         XCTAssertTrue(PrintHTML.document(source, title: "Test", diagramHTML: { _ in "<img alt=\"diagram\">" }).contains("<img alt=\"diagram\">"))
+        let styled = PrintHTML.document("Body", title: "Test", fontChoice: .georgia, fontSize: 18)
+        XCTAssertTrue(styled.contains("font: 18.0pt Georgia, serif"))
     }
 }
 
@@ -80,6 +82,14 @@ extension PeleTests {
             }
         }
         XCTAssertTrue(containsInk, "The print attachment should contain rendered diagram pixels.")
+    }
+
+    @MainActor func testNativePrintUsesSelectedFontAndSize() throws {
+        _ = NSApplication.shared
+        let document = NativePrintRenderer.attributedDocument("Print body", fontChoice: .georgia, fontSize: 18)
+        let selectedFont = try XCTUnwrap(document.attribute(.font, at: 0, effectiveRange: nil) as? NSFont)
+        XCTAssertEqual(selectedFont.pointSize, 18, accuracy: 0.1)
+        XCTAssertTrue(selectedFont.familyName?.localizedCaseInsensitiveContains("Georgia") == true)
     }
 
     @MainActor func testVisualFixtures() throws {

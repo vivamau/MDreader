@@ -21,7 +21,13 @@ enum PrintHTML {
         }.joined()
     }
 
-    static func document(_ source: String, title: String, diagramHTML: ((String) -> String?)? = nil) -> String {
+    static func document(
+        _ source: String,
+        title: String,
+        fontChoice: ReaderFont = .system,
+        fontSize: Double = 11,
+        diagramHTML: ((String) -> String?)? = nil
+    ) -> String {
         let body = MarkdownBlocks.parse(source).map { block -> String in
             switch block {
             case let .heading(level, text): return "<h\(level)>\(inline(text))</h\(level)>"
@@ -41,12 +47,20 @@ enum PrintHTML {
                 return "<table><thead>\(row(headers, tag: "th"))</thead><tbody>\(rows.map { row($0, tag: "td") }.joined())</tbody></table>"
             }
         }.joined(separator: "\n")
+        let family: String
+        switch fontChoice {
+        case .system: family = "-apple-system, BlinkMacSystemFont, sans-serif"
+        case .serif: family = "ui-serif, Georgia, serif"
+        case .rounded: family = "ui-rounded, -apple-system, sans-serif"
+        case .monospaced: family = "ui-monospace, Menlo, monospace"
+        case .georgia: family = "Georgia, serif"
+        }
         return """
         <!doctype html><html><head><meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
         <title>\(escape(title))</title><style>
-        :root { color-scheme: light; } body { font: 11pt -apple-system, sans-serif; line-height: 1.45; color: #111; background: white; margin: 24px; }
+        :root { color-scheme: light; } body { font: \(fontSize)pt \(family); line-height: 1.45; color: #111; background: white; margin: 24px; }
         h1,h2,h3,h4,h5,h6 { break-after: avoid; } p { white-space: pre-wrap; }
         table { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 16px 0; font-size: 9pt; }
         th,td { border: 1px solid #bbb; padding: 6px; vertical-align: top; overflow-wrap: anywhere; }

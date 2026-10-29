@@ -33,6 +33,8 @@ struct PrintPreview: View {
     @State private var printError: String?
     let source: String
     let title: String
+    let fontChoice: ReaderFont
+    let fontSize: Double
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,18 +44,29 @@ struct PrintPreview: View {
                 Button("Close") { dismiss() }.keyboardShortcut(.cancelAction)
                 #if os(macOS)
                 Button("Print…", systemImage: "printer") {
-                    NativePrintRenderer.printDocument(source: source, title: title)
+                    NativePrintRenderer.printDocument(
+                        source: source,
+                        title: title,
+                        fontChoice: fontChoice,
+                        fontSize: fontSize
+                    )
                 }
                 #else
-                AirPrintButton(source: source, title: title, error: $printError)
+                AirPrintButton(
+                    source: source,
+                    title: title,
+                    fontChoice: fontChoice,
+                    fontSize: fontSize,
+                    error: $printError
+                )
                     .frame(width: 90, height: 36)
                 #endif
             }.padding()
             Divider()
             #if os(macOS)
-            NativePrintPreview(source: source)
+            NativePrintPreview(source: source, fontChoice: fontChoice, fontSize: fontSize)
             #else
-            MarkdownPreview(source: source, fontSize: 15)
+            MarkdownPreview(source: source, fontSize: fontSize, fontChoice: fontChoice)
                 .environment(\.colorScheme, .light)
             #endif
             if let printError { Text(printError).foregroundStyle(.red).padding() }
@@ -67,8 +80,15 @@ struct PrintPreview: View {
 #if os(macOS)
 private struct NativePrintPreview: NSViewRepresentable {
     let source: String
+    let fontChoice: ReaderFont
+    let fontSize: Double
     final class Coordinator {
-        var source = ""
+        var configuration = Configuration(source: "", fontChoice: .system, fontSize: 0)
+    }
+    struct Configuration: Equatable {
+        let source: String
+        let fontChoice: ReaderFont
+        let fontSize: Double
     }
     func makeCoordinator() -> Coordinator { Coordinator() }
     func makeNSView(context: Context) -> NSScrollView {
@@ -77,14 +97,25 @@ private struct NativePrintPreview: NSViewRepresentable {
         scroll.hasHorizontalScroller = true
         scroll.drawsBackground = true
         scroll.backgroundColor = .white
-        scroll.documentView = NativePrintRenderer.textView(source: source, width: 540)
-        context.coordinator.source = source
+        scroll.documentView = NativePrintRenderer.textView(
+            source: source,
+            width: 540,
+            fontChoice: fontChoice,
+            fontSize: fontSize
+        )
+        context.coordinator.configuration = Configuration(source: source, fontChoice: fontChoice, fontSize: fontSize)
         return scroll
     }
     func updateNSView(_ nsView: NSScrollView, context: Context) {
-        guard context.coordinator.source != source else { return }
-        nsView.documentView = NativePrintRenderer.textView(source: source, width: 540)
-        context.coordinator.source = source
+        let configuration = Configuration(source: source, fontChoice: fontChoice, fontSize: fontSize)
+        guard context.coordinator.configuration != configuration else { return }
+        nsView.documentView = NativePrintRenderer.textView(
+            source: source,
+            width: 540,
+            fontChoice: fontChoice,
+            fontSize: fontSize
+        )
+        context.coordinator.configuration = configuration
     }
 }
 #else
@@ -92,6 +123,8 @@ private struct NativePrintPreview: NSViewRepresentable {
 private struct AirPrintButton: UIViewRepresentable {
     let source: String
     let title: String
+    let fontChoice: ReaderFont
+    let fontSize: Double
     @Binding var error: String?
 
     func makeUIView(context: Context) -> UIButton {
@@ -106,7 +139,12 @@ private struct AirPrintButton: UIViewRepresentable {
             info.outputType = .general
             controller.printInfo = info
             let pele = try? PeleEngine()
-            controller.printFormatter = UIMarkupTextPrintFormatter(markupText: PrintHTML.document(source, title: title) { text in
+            controller.printFormatter = UIMarkupTextPrintFormatter(markupText: PrintHTML.document(
+                source,
+                title: title,
+                fontChoice: fontChoice,
+                fontSize: fontSize
+            ) { text in
                 guard let svg = try? pele?.render(text, width: 540) else { return nil }
                 let scale = min(1, 520 / svg.size.width, 650 / svg.size.height)
                 let size = CGSize(width: svg.size.width * scale, height: svg.size.height * scale)

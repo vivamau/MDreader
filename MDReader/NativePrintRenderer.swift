@@ -5,9 +5,30 @@ import SwiftDraw
 /// Uses AppKit's text layout and pagination, without a web content process.
 @MainActor
 enum NativePrintRenderer {
-    static func attributedDocument(_ source: String) -> NSAttributedString {
+    private static func font(_ choice: ReaderFont, size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
+        switch choice {
+        case .system: return .systemFont(ofSize: size, weight: weight)
+        case .serif, .rounded:
+            let design: NSFontDescriptor.SystemDesign = choice == .serif ? .serif : .rounded
+            let descriptor = NSFontDescriptor.preferredFontDescriptor(forTextStyle: .body).withDesign(design)
+            let base = descriptor.flatMap { NSFont(descriptor: $0, size: size) }
+                ?? .systemFont(ofSize: size, weight: weight)
+            return weight >= .semibold
+                ? NSFontManager.shared.convert(base, toHaveTrait: .boldFontMask)
+                : base
+        case .monospaced: return .monospacedSystemFont(ofSize: size, weight: weight)
+        case .georgia: return NSFont(name: weight >= .semibold ? "Georgia-Bold" : "Georgia", size: size) ?? .systemFont(ofSize: size, weight: weight)
+        }
+    }
+
+    static func attributedDocument(
+        _ source: String,
+        fontChoice: ReaderFont = .system,
+        fontSize: Double = 11
+    ) -> NSAttributedString {
         let result = NSMutableAttributedString()
-        let bodyFont = NSFont.systemFont(ofSize: 11)
+        let bodySize = CGFloat(fontSize)
+        let bodyFont = font(fontChoice, size: bodySize)
         var pele: PeleEngine?
 
         func inline(_ text: String, font: NSFont) -> NSMutableAttributedString {
@@ -27,7 +48,8 @@ enum NativePrintRenderer {
             return result
         }
 
-        func append(_ text: String, font: NSFont = NSFont.systemFont(ofSize: 11), style: NSMutableParagraphStyle = NSMutableParagraphStyle(), literal: Bool = false) {
+        func append(_ text: String, font: NSFont? = nil, style: NSMutableParagraphStyle = NSMutableParagraphStyle(), literal: Bool = false) {
+            let font = font ?? bodyFont
             let content = literal ? NSMutableAttributedString(string: text, attributes: [.font: font, .foregroundColor: NSColor.black]) : inline(text, font: font)
             content.append(NSAttributedString(string: "\n", attributes: [.font: font, .foregroundColor: NSColor.black]))
             content.addAttribute(.paragraphStyle, value: style, range: NSRange(location: 0, length: content.length))
@@ -39,7 +61,8 @@ enum NativePrintRenderer {
             style.paragraphSpacing = 8
             switch block {
             case let .heading(level, text):
-                append(text, font: .boldSystemFont(ofSize: level == 1 ? 22 : level == 2 ? 18 : 14), style: style)
+                let scale: CGFloat = level == 1 ? 2 : level == 2 ? 1.6 : 1.25
+                append(text, font: font(fontChoice, size: bodySize * scale, weight: .bold), style: style)
             case let .paragraph(text), let .item(text): append(text, style: style)
             case let .mermaid(text):
                 do {
@@ -83,7 +106,7 @@ enum NativePrintRenderer {
                         let paragraph = NSMutableParagraphStyle()
                         paragraph.textBlocks = [cell]
                         paragraph.alignment = alignments[column] == .right ? .right : alignments[column] == .center ? .center : .left
-                        append(text, font: rowIndex == 0 ? .boldSystemFont(ofSize: 10) : bodyFont, style: paragraph)
+                        append(text, font: rowIndex == 0 ? font(fontChoice, size: bodySize, weight: .bold) : bodyFont, style: paragraph)
                     }
                 }
                 append("", style: style)
@@ -92,7 +115,12 @@ enum NativePrintRenderer {
         return result
     }
 
-    static func textView(source: String, width: CGFloat) -> NSTextView {
+    static func textView(
+        source: String,
+        width: CGFloat,
+        fontChoice: ReaderFont = .system,
+        fontSize: Double = 11
+    ) -> NSTextView {
         let view = NSTextView(frame: NSRect(x: 0, y: 0, width: width, height: 1))
         view.isEditable = false
         view.isHorizontallyResizable = false
@@ -103,7 +131,7 @@ enum NativePrintRenderer {
         view.textContainerInset = NSSize(width: 0, height: 8)
         view.textContainer?.widthTracksTextView = true
         view.textContainer?.containerSize = NSSize(width: width, height: .greatestFiniteMagnitude)
-        view.textStorage?.setAttributedString(attributedDocument(source))
+        view.textStorage?.setAttributedString(attributedDocument(source, fontChoice: fontChoice, fontSize: fontSize))
         if let container = view.textContainer, let layout = view.layoutManager {
             layout.ensureLayout(for: container)
             view.setFrameSize(NSSize(width: width, height: max(1, layout.usedRect(for: container).height + 16)))
@@ -111,14 +139,24 @@ enum NativePrintRenderer {
         return view
     }
 
-    static func printDocument(source: String, title: String) {
+    static func printDocument(
+        source: String,
+        title: String,
+        fontChoice: ReaderFont = .system,
+        fontSize: Double = 11
+    ) {
         let info = NSPrintInfo.shared.copy() as! NSPrintInfo
         info.topMargin = 36; info.bottomMargin = 36
         info.leftMargin = 36; info.rightMargin = 36
         info.horizontalPagination = .fit
         info.verticalPagination = .automatic
         info.isVerticallyCentered = false
-        let view = textView(source: source, width: max(72, info.paperSize.width - info.leftMargin - info.rightMargin))
+        let view = textView(
+            source: source,
+            width: max(72, info.paperSize.width - info.leftMargin - info.rightMargin),
+            fontChoice: fontChoice,
+            fontSize: fontSize
+        )
         let operation = NSPrintOperation(view: view, printInfo: info)
         operation.jobTitle = title
         operation.showsPrintPanel = true

@@ -31,20 +31,6 @@ private enum AppTheme: String, CaseIterable, Identifiable {
     }
 }
 
-enum ReaderFont: String, CaseIterable, Identifiable {
-    case system = "System", serif = "Serif", rounded = "Rounded", monospaced = "Monospaced", georgia = "Georgia"
-    var id: Self { self }
-    func font(size: Double) -> Font {
-        switch self {
-        case .system: .system(size: size)
-        case .serif: .system(size: size, design: .serif)
-        case .rounded: .system(size: size, design: .rounded)
-        case .monospaced: .system(size: size, design: .monospaced)
-        case .georgia: .custom("Georgia", size: size)
-        }
-    }
-}
-
 private extension Color {
     init(rgb: Int) {
         self.init(.sRGB, red: Double((rgb >> 16) & 255) / 255,
@@ -74,6 +60,8 @@ struct EditorView: View {
     @State private var showingSettings = false
     @State private var showingPrint = false
     @SceneStorage("editorMode") private var mode: EditorMode = .split
+    @SceneStorage("editorSplitFraction") private var savedSplitFraction = 0.5
+    @State private var splitFraction = 0.5
     @AppStorage("editorFontSize") private var fontSize = 15.0
     @AppStorage("appTheme") private var theme: AppTheme = .system
     @AppStorage("editorFontFamily") private var editorFont: ReaderFont = .monospaced
@@ -121,38 +109,29 @@ struct EditorView: View {
 
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
+            GeometryReader { geometry in
                 if mode == .preview {
                     preview
-                } else if mode == .split && geometry.size.width >= 650 {
-                    HStack(spacing: 0) {
-                        editor
-                        Divider()
-                        preview
-                    }
                 } else if mode == .split {
-                    VStack(spacing: 0) {
-                        editor
-                        Divider()
-                        preview
-                    }
+                    splitView(size: geometry.size)
                 } else { editor }
-                Divider()
-                HStack(spacing: 16) {
-                    Label("Markdown", systemImage: "doc.plaintext")
-                    Spacer()
-                    Text("\(document.text.split(whereSeparator: { $0.isWhitespace }).count) words")
-                    Text("\(document.text.count) characters")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 9)
-                .background(.background)
             }
+            Divider()
+            HStack(spacing: 16) {
+                Label("Markdown", systemImage: "doc.plaintext")
+                Spacer()
+                Text("\(document.text.split(whereSeparator: { $0.isWhitespace }).count) words")
+                Text("\(document.text.count) characters")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 9)
+            .background(.background)
         }
         .background(.background)
+        .onAppear { splitFraction = savedSplitFraction }
         #if os(macOS)
         // Always provide a resolved preference: nil can leave SwiftUI's window chrome stale.
         .preferredColorScheme(resolvedTheme)
@@ -164,7 +143,12 @@ struct EditorView: View {
         #endif
         .focusedSceneValue(\.printDocument, { showingPrint = true })
         .sheet(isPresented: $showingPrint) {
-            PrintPreview(source: document.text, title: documentTitle)
+            PrintPreview(
+                source: document.text,
+                title: documentTitle,
+                fontChoice: previewFont,
+                fontSize: fontSize
+            )
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -254,20 +238,133 @@ struct EditorView: View {
     }
 
     private var editor: some View {
-        TextEditor(text: $document.text)
-            .font(editorFont.font(size: fontSize))
-            .foregroundStyle(documentTextColor)
-            .scrollContentBackground(.hidden)
-            .padding(12)
-            .background(Color(rgb: editorBackgroundRGB))
-            .environment(\.colorScheme, canvasScheme)
-            .accessibilityLabel("Markdown source")
-            #if os(iOS)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            #endif
+        VStack(spacing: 0) {
+            MarkdownFormattingBar(text: $document.text)
+            Divider()
+            TextEditor(text: $document.text)
+                .font(editorFont.font(size: fontSize))
+                .foregroundStyle(documentTextColor)
+                .scrollContentBackground(.hidden)
+                .padding(12)
+                .accessibilityLabel("Markdown source")
+                #if os(iOS)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                #endif
+        }
+        .background(Color(rgb: editorBackgroundRGB))
+        .environment(\.colorScheme, canvasScheme)
+    }
+
+    @ViewBuilder
+    private func splitView(size: CGSize) -> some View {
+        #if os(macOS)
+        // Use AppKit's split-view implementation through SwiftUI. It owns the
+        // drag loop and cursor rects, so resizing remains smooth even while the
+        // preview is laying out diagrams and other expensive content.
+        if size.width >= 650 {
+            HSplitView {
+                editor.frame(minWidth: 220, maxWidth: .infinity, maxHeight: .infinity)
+                preview.frame(minWidth: 220, maxWidth: .infinity, maxHeight: .infinity)
+            }
+        } else {
+            VSplitView {
+                editor.frame(maxWidth: .infinity, minHeight: 140, maxHeight: .infinity)
+                preview.frame(maxWidth: .infinity, minHeight: 140, maxHeight: .infinity)
+            }
+        }
+        #else
+        if size.width >= 650 {
+            let available = max(1, size.width - ResizableSplitDivider.thickness)
+            HStack(spacing: 0) {
+                editor.frame(width: available * splitFraction)
+                ResizableSplitDivider(
+                    orientation: .columns,
+                    totalLength: available,
+                    fraction: $splitFraction,
+                    onCommit: { savedSplitFraction = $0 }
+                )
+                preview.frame(width: available * (1 - splitFraction))
+            }
+        } else {
+            let available = max(1, size.height - ResizableSplitDivider.thickness)
+            VStack(spacing: 0) {
+                editor.frame(height: available * splitFraction)
+                ResizableSplitDivider(
+                    orientation: .rows,
+                    totalLength: available,
+                    fraction: $splitFraction,
+                    onCommit: { savedSplitFraction = $0 }
+                )
+                preview.frame(height: available * (1 - splitFraction))
+            }
+        }
+        #endif
     }
 }
+
+#if os(iOS)
+private struct ResizableSplitDivider: View {
+    enum Orientation { case columns, rows }
+    static let thickness: CGFloat = 12
+
+    let orientation: Orientation
+    let totalLength: CGFloat
+    @Binding var fraction: Double
+    let onCommit: (Double) -> Void
+    @State private var dragStart: Double?
+    @State private var hovering = false
+    @State private var dragging = false
+
+    private var minimumFraction: Double {
+        min(0.4, Double((orientation == .columns ? 220 : 140) / max(1, totalLength)))
+    }
+
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .fill(Color.secondary.opacity(hovering || dragging ? 0.65 : 0.3))
+                .frame(
+                    width: orientation == .columns ? 1 : nil,
+                    height: orientation == .rows ? 1 : nil
+                )
+        }
+        .frame(
+            width: orientation == .columns ? Self.thickness : nil,
+            height: orientation == .rows ? Self.thickness : nil
+        )
+        .contentShape(Rectangle())
+        .onHover { inside in
+            hovering = inside
+        }
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    if dragStart == nil {
+                        dragStart = fraction
+                        dragging = true
+                    }
+                    let translation = orientation == .columns ? value.translation.width : value.translation.height
+                    let proposed = (dragStart ?? fraction) + Double(translation / max(1, totalLength))
+                    fraction = min(1 - minimumFraction, max(minimumFraction, proposed))
+                }
+                .onEnded { _ in
+                    dragStart = nil
+                    dragging = false
+                    onCommit(fraction)
+                }
+        )
+        .accessibilityElement()
+        .accessibilityLabel("Resize editor and preview")
+        .accessibilityValue("Editor \(Int(fraction * 100)) percent")
+        .accessibilityAdjustableAction { direction in
+            let proposed = fraction + (direction == .increment ? 0.05 : -0.05)
+            fraction = min(1 - minimumFraction, max(minimumFraction, proposed))
+            onCommit(fraction)
+        }
+    }
+}
+#endif
 
 struct MarkdownPreview: View {
     let source: String

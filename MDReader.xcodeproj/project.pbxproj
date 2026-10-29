@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		B00000000000000000000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000015; };
+		B00000000000000000000016 /* ReaderFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000016 /* ReaderFont.swift */; };
+		B00000000000000000000017 /* MarkdownFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000000000000000000017 /* MarkdownFormatting.swift */; };
 B00000000000000000000014 = {isa = PBXBuildFile; fileRef = F00000000000000000000014; };
 B00000000000000000000013 = {isa = PBXBuildFile; fileRef = F00000000000000000000013; };
         B00000000000000000000012 = {isa = PBXBuildFile; fileRef = F00000000000000000000012; };
@@ -28,6 +30,8 @@ B00000000000000000000013 = {isa = PBXBuildFile; fileRef = F000000000000000000000
 
 /* Begin PBXFileReference section */
 		F00000000000000000000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F00000000000000000000016 /* ReaderFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderFont.swift; sourceTree = "<group>"; };
+		F00000000000000000000017 /* MarkdownFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownFormatting.swift; sourceTree = "<group>"; };
 F00000000000000000000014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentWorkspace.swift; sourceTree = "<group>"; };
 F00000000000000000000013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentDocuments.swift; sourceTree = "<group>"; };
         F00000000000000000000012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAppearance.swift; sourceTree = "<group>"; };
@@ -69,6 +73,8 @@ F00000000000000000000013 = {isa = PBXFileReference; lastKnownFileType = sourceco
 		A00000000000000000000003 /* MDReader */ = {
 			isa = PBXGroup;
 			children = (
+				F00000000000000000000017 /* MarkdownFormatting.swift */,
+				F00000000000000000000016 /* ReaderFont.swift */,
 				F00000000000000000000012 /* WindowAppearance.swift */,
                 F00000000000000000000013 /* RecentDocuments.swift */,
 F00000000000000000000014 /* DocumentWorkspace.swift */,
@@ -169,6 +175,8 @@ F00000000000000000000011 /* NativePrintRenderer.swift */,
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B00000000000000000000017 /* MarkdownFormatting.swift in Sources */,
+				B00000000000000000000016 /* ReaderFont.swift in Sources */,
 				B00000000000000000000012 /* WindowAppearance.swift in Sources */,
                 B00000000000000000000013 /* RecentDocuments.swift in Sources */,
 B00000000000000000000014 /* DocumentWorkspace.swift in Sources */,
@@ -285,8 +293,8 @@ B00000000000000000000011 /* NativePrintRenderer.swift in Sources */,
 				INFOPLIST_FILE = MDReader/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				CURRENT_PROJECT_VERSION = 5;
-				MARKETING_VERSION = 0.3.0;
+				CURRENT_PROJECT_VERSION = 6;
+				MARKETING_VERSION = 0.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.example.MDReader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -311,8 +319,8 @@ B00000000000000000000011 /* NativePrintRenderer.swift in Sources */,
 				INFOPLIST_FILE = MDReader/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				CURRENT_PROJECT_VERSION = 5;
-				MARKETING_VERSION = 0.3.0;
+				CURRENT_PROJECT_VERSION = 6;
+				MARKETING_VERSION = 0.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.example.MDReader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
