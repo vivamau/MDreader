@@ -2,6 +2,8 @@
 
 A native SwiftUI Markdown document editor for macOS 14+, iPhone, and iPad (iOS/iPadOS 17+). Pele and SwiftDraw are vendored for offline rendering; no network services are used.
 
+Visit the [MDReader website](https://vivamau.github.io/MDreader/) for an overview and the latest macOS download.
+
 ## Run
 
 Open `MDReader.xcodeproj` in Xcode, select the MDReader scheme, choose My Mac or an iPhone/iPad simulator, and press Run. For a physical iOS device, select your development team under Signing & Capabilities and replace `org.example.MDReader` with your own bundle identifier.
